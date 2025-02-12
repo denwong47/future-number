@@ -1,0 +1,48 @@
+name: CI Format, Lint and Pytest
+
+on:
+  push:
+    branches:
+    - development
+    - main
+  pull_request:
+    # Changing the base branch will update the status correctly.
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci-pre-commit:
+    name: ci-pre-commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.pull_request.draft == false
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ vars.PRECOMMIT_PYTHON_VERSION }}
+    - name: actionlint
+      uses: raven-actions/actionlint@v2
+    - name: List files
+      run: ls -la
+    - name: Install dependencies
+      run: pip install -e ".[dev]"
+    - name: Cache pre-commit
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ github.head_ref}}-${{ hashFiles('.pre-commit-config.yaml') }}
+    - name: Run pre-commit and display to summary
+      run: |
+        echo '```console' > "$GITHUB_STEP_SUMMARY"
+        # Enable colour output for pre-commit and remove it for the summary.
+        pre-commit run --all-files --show-diff-on-failure --color=always >> "$GITHUB_STEP_SUMMARY"
+        exit_code="${PIPESTATUS[0]}"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+        exit "$exit_code"

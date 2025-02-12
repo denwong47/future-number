@@ -1,0 +1,61 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.0"]
+
+[project]
+authors = [
+  {name = "Denny Wong", email = "denwong47@hotmail.com"}
+]
+classifiers = [
+  "Programming Language :: Python :: 3.10"
+]
+description = "Lazy evaluating generic numbers."
+name = "future-number"
+readme = "README.md"
+requires-python = ">=3.10"
+version = "0.1.0"
+
+[project.optional-dependencies]
+dev = [
+  # These pins are deliberately loose to allow it to work with those of FPU.
+  "ruff",
+  # Numpy is used in the unit tests.
+  "numpy",
+  "pre-commit",
+  "pydata-sphinx-theme",
+  "pytest",
+  "sphinx"
+]
+
+[project.urls]
+repository = "https://github.com/denwong47/future-number"
+
+[tool.isort]
+profile = "black"
+py_version = 310
+sections = [
+  "FUTURE",
+  "STDLIB",
+  "THIRDPARTY",
+  "FIRSTPARTY",
+  "LOCALFOLDER"
+]
+
+[tool.mypy]
+plugins = []
+
+[tool.pyright]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "local: marks tests as only intended to be run locally as opposed to e.g. on GitHub actions"
+]
+
+[tool.setuptools.package-data]
+future_number = ["py.typed"]
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["src"]
